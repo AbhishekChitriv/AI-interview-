@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume & JD - Interview Configuration & Analysis</title>
+    <meta name="description"
+        content="Upload candidate resume and target Job Description. Eliora will generate personalized interview questions and compute match alignment using AI.">
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- Top Navigation Header -->
+    <header class="app-nav">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fa-solid fa-file-contract logo-icon"></i>
+                <span class="logo-text">Resume & JD</span>
+                <span class="brand-badge">Eliora AI 2.0</span>
+            </div>
+            <div class="nav-actions">
+                <div class="provider-selector" id="providerSelector">
+                    <span class="provider-label"><i class="fa-solid fa-microchip"></i> Engine:</span>
+                    <select id="aiProviderSelect" class="provider-dropdown">
+                        <option value="groq" selected>Groq (Llama 3.3 70B - Ultra Fast)</option>
+                        <option value="gemini">Gemini 2.0 Flash</option>
+                        <option value="claude">Claude 3.5 Sonnet</option>
+                    </select>
+                </div>
+                <button class="btn-theme-toggle" id="themeToggleBtn" title="Toggle Theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-wrapper">
+
+        <!-- Page Header -->
+        <section class="page-header">
+            <h1 class="page-title">Interview Configuration & Analysiss</h1>
+            <p class="page-subtitle">Upload candidate resume and target Job Description. Eliora will generate
+                personalized questions and compute match alignment.</p>
+        </section>
+
+        <!-- STATE 1: INITIAL UPLOAD SECTION (Shown first when user lands on page) -->
+        <div id="initialUploadView" class="initial-upload-container">
+
+            <div class="config-grid">
+                <!-- STEP 1 CARD: Upload Resume -->
+                <div class="card card-step" id="step1UploadCard">
+                    <div class="card-header">
+                        <div class="card-header-info">
+                            <h2 class="card-title">Upload Resume</h2>
+                            <span class="card-subtitle">PDF, DOCX, or TXT format</span>
+                        </div>
+                        <span class="step-badge">Step 1</span>
+                    </div>
+
+                    <!-- Drag & Drop Zone / Direct Document Picker Trigger -->
+                    <div class="dropzone" id="resumeDropzone" title="Click to select and upload resume document">
+                        <input type="file" id="resumeFileInput" accept=".pdf,.docx,.doc,.txt" hidden>
+                        <div class="dropzone-content">
+                            <div class="upload-icon-wrapper">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+                            <p class="dropzone-title">Click to open & select resume document</p>
+                            <p class="dropzone-subtext">Supports PDF, DOCX, or TXT format</p>
+
+                            <button type="button" class="btn-browse-file" id="browseResumeBtn">
+                                <i class="fa-solid fa-folder-open"></i> Upload Resume Document
+                            </button>
+                        </div>
+                        <div class="file-uploaded-status" id="resumeUploadedStatus" style="display: none;">
+                            <i class="fa-solid fa-circle-check check-icon"></i>
+                            <div class="file-meta">
+                                <span class="file-name" id="resumeFileName">resume.pdf</span>
+                                <span class="file-size" id="resumeFileSize">Extracting and parsing profile...</span>
+                            </div>
+                            <button type="button" class="btn-remove-file" id="removeResumeBtn" title="Remove file">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="divider-text">
+                        <span>OR PASTE RESUME TEXT</span>
+                    </div>
+
+                    <div class="textarea-wrapper">
+                        <textarea id="resumeTextarea" placeholder="Paste candidate resume plain text here..."
+                            rows="4"></textarea>
+                    </div>
+
+                    <button type="button" class="btn-parse-pasted" id="parsePastedBtn" style="display: none;">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Parse Pasted Resume Text
+                    </button>
+                </div>
+
+                <!-- STEP 2 CARD: Target Job Description (JD) -->
+                <div class="card card-step step-2-highlight" id="step2UploadCard">
+                    <div class="card-header">
+                        <div class="card-header-info">
+                            <h2 class="card-title">Target Job Description (JD)</h2>
+                            <span class="card-subtitle">Upload or paste target role requirements</span>
+                        </div>
+                        <span class="step-badge">Step 2</span>
+                    </div>
+
+                    <!-- Drag & Drop Zone / Direct Document Picker Trigger -->
+                    <div class="dropzone dropzone-active-style" id="jdDropzone"
+                        title="Click to select and upload Job Description document">
+                        <input type="file" id="jdFileInput" accept=".pdf,.docx,.doc,.txt" hidden>
+                        <div class="dropzone-content">
+                            <div class="upload-icon-wrapper">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </div>
+                            <p class="dropzone-title">Click to open & select Job Description</p>
+                            <p class="dropzone-subtext">Supports PDF, DOCX, or TXT format</p>
+
+                            <button type="button" class="btn-browse-file btn-browse-jd" id="browseJdBtn">
+                                <i class="fa-solid fa-folder-open"></i> Upload Job Description Document
+                            </button>
+                        </div>
+                        <div class="file-uploaded-status" id="jdUploadedStatus" style="display: none;">
+                            <i class="fa-solid fa-circle-check check-icon"></i>
+                            <div class="file-meta">
+                                <span class="file-name" id="jdFileName">job_description.pdf</span>
+                                <span class="file-size" id="jdFileSize">Loaded successfully</span>
+                            </div>
+                            <button type="button" class="btn-remove-file" id="removeJdBtn" title="Remove file">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="divider-text">
+                        <span>OR PASTE JOB DESCRIPTION TEXT</span>
+                    </div>
+
+                    <div class="textarea-wrapper">
+                        <textarea id="jdTextarea" placeholder="Paste target Job Description text here..."
+                            rows="4"></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- STATE 2: PARSED CANDIDATE PROFILE & INTERVIEW CONFIGURATION (Shown after upload/parsing) -->
+        <div id="parsedProfileView" class="cards-stack" style="display: none;">
+
+            <!-- STEP 1 CARD: Parsed Candidate Profile -->
+            <div class="card card-step" id="step1Card">
+                <div class="card-header">
+                    <div class="card-header-info">
+                        <h2 class="card-title">Upload Resume</h2>
+                        <span class="card-subtitle">PDF, DOCX, or TXT format</span>
+                    </div>
+                    <span class="step-badge">Step 1</span>
+                </div>
+
+                <!-- Parsed Candidate Profile View (Matched 100% to Screenshot) -->
+                <div class="parsed-profile-card" id="resumeBigScreen">
+                    <div class="parsed-profile-content">
+                        <h4 class="parsed-section-label">Parsed Candidate Profile</h4>
+                        <h2 class="parsed-candidate-name" id="bsCandidateName">Candidate</h2>
+                        <p class="parsed-candidate-role" id="bsCandidateRole">Artificial Intelligence Engineer | Data
+                            Scientist</p>
+
+                        <p class="parsed-candidate-summary" id="bsSummaryText">
+                            Motivated and detail-oriented Artificial Intelligence undergraduate seeking a Data Scientist
+                            or Machine Learning role. Eager to contribute to AI-driven projects while continuously
+                            learning and growing in a collaborative environment.
+                        </p>
+
+                        <!-- Skill Pills Row -->
+                        <div class="skill-pills-row" id="bsSkillTags">
+                            <span class="skill-pill">Python</span>
+                            <span class="skill-pill">SQL</span>
+                            <span class="skill-pill">Machine Learning</span>
+                            <span class="skill-pill">Data Analysis</span>
+                            <span class="skill-pill">Scikit-learn</span>
+                            <span class="skill-pill">C</span>
+                            <span class="skill-pill">C++</span>
+                            <span class="skill-pill">NumPy</span>
+                            <span class="skill-pill">Pandas</span>
+                            <span class="skill-pill">Seaborn</span>
+                            <span class="skill-pill">Matplotlib</span>
+                        </div>
+
+                        <!-- Target Job Title Selection Box -->
+                        <div class="target-job-selection-box">
+                            <div class="target-job-header">
+                                <span class="target-job-icon">🎯</span>
+                                <h4 class="target-job-title-label">Select Target Job Title</h4>
+                            </div>
+                            <p class="target-job-subtext">AI-recommended job titles based on your resume skills,
+                                education, experience, and projects:</p>
+                            <div class="select-wrapper">
+                                <select id="targetJobTitleSelect" class="form-control target-job-dropdown">
+                                    <option value="Data Analyst" selected>🎯 Data Analyst (Top AI Recommendation)
+                                    </option>
+                                    <option value="Artificial Intelligence Engineer">🤖 Artificial Intelligence Engineer
+                                    </option>
+                                    <option value="Data Scientist">💻 Data Scientist</option>
+                                    <option value="Machine Learning Engineer">⚙️ Machine Learning Engineer</option>
+                                    <option value="Business Intelligence Analyst">📊 Business Intelligence Analyst
+                                    </option>
+                                </select>
+                                <i class="fa-solid fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+
+                        <!-- Small Right-Aligned Action Button -->
+                        <div class="resume-action-row"
+                            style="display: flex; justify-content: flex-end; margin-top: 14px; width: 100%;">
+                            <button type="button" class="btn-resume-action btn-blue-small btn-blue-full"
+                                id="changeResumeBtn"
+                                style="background: #0052CC; color: #FFFFFF; border: none; border-radius: 20px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 7px; box-shadow: 0 2px 8px rgba(0, 82, 204, 0.25);">
+                                <i class="fa-solid fa-upload" style="color: #FFFFFF; font-size: 12px;"></i> Upload a
+                                different resume
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Configuration & Settings Card (Bottom Row) -->
+            <div class="card card-config-bottom">
+
+                <!-- Accent Selector & Primary Action Row -->
+                <div class="accent-launch-row">
+
+                    <!-- Accent Selector -->
+                    <div class="accent-selector-group">
+                        <span class="accent-label">AI Interviewer Accent:</span>
+                        <div class="accent-pills">
+                            <label class="accent-pill active" id="accentIndianLabel">
+                                <input type="radio" name="interviewerAccent" value="Indian" checked hidden>
+                                <span>Indian <span class="flag-icon">🇮🇳</span></span>
+                            </label>
+                            <label class="accent-pill" id="accentForeignLabel">
+                                <input type="radio" name="interviewerAccent" value="Foreign" hidden>
+                                <span>Foreign <span class="flag-icon">🌐</span></span>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Primary Action Launch Button -->
+                <div class="launch-btn-container">
+                    <button type="button" class="btn-primary-launch" id="launchInterviewBtn">
+                        <span class="play-icon-circle"><i class="fa-solid fa-play"></i></span>
+                        <span class="launch-text">Generate Questions & Launch Live AI HR Interview</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>© 2026 Resume & JD Setup • Powered by Eliora AI Recruiter Engine</p>
+    </footer>
+
+    <!-- MODAL 1: Extracted Resume Profile Drawer -->
+    <div class="modal-overlay" id="resumeProfileModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-id-card"></i> Extracted Candidate Profile</h3>
+                <button class="btn-close-modal" id="closeResumeModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="resumeProfileModalBody">
+                <div class="loading-spinner-box">
+                    <i class="fa-solid fa-spinner fa-spin spinner"></i>
+                    <p>Eliora AI is parsing skills, experience, and achievements...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: JD & Resume Alignment Analysis Dashboard -->
+    <div class="modal-overlay" id="alignmentModal">
+        <div class="modal-card modal-large">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-chart-line"></i> Job Description & Resume Match Alignment</h3>
+                <button class="btn-close-modal" id="closeAlignmentModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="alignmentModalBody">
+                <div class="loading-spinner-box">
+                    <i class="fa-solid fa-spinner fa-spin spinner"></i>
+                    <p>Computing match percentage, skill gaps, and strengths...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Live AI HR Interview Room -->
+    <div class="modal-overlay modal-full" id="interviewModal">
+        <div class="modal-card modal-interview-room">
+
+            <!-- Interview Header Bar -->
+            <div class="interview-header">
+                <div class="interviewer-brand">
+                    <div class="avatar-circle pulse">
+                        <img src="/static/avatar/female_recruiter.jpg" alt="Eliora AI HR">
+                    </div>
+                    <div class="interviewer-meta">
+                        <span class="interviewer-name">Eliora <span class="badge-live">LIVE HR INTERVIEW</span></span>
+                        <span class="interviewer-role">AI Executive Recruiter • <span id="currentAccentDisplay">Indian
+                                Accent 🇮🇳</span></span>
+                    </div>
+                </div>
+                <div class="interview-stats">
+                    <div class="stat-badge"><i class="fa-solid fa-clock"></i> <span id="timerDisplay">00:00</span></div>
+                    <div class="stat-badge"><i class="fa-solid fa-list-check"></i> Question <span
+                            id="qCurrentIndex">1</span> of <span id="qTotalCount">5</span></div>
+                </div>
+                <button class="btn-close-interview" id="exitInterviewBtn" title="Exit Interview Session">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Exit Session
+                </button>
+            </div>
+
+            <!-- Main Interview Arena -->
+            <div class="interview-body" id="interviewBody">
+
+                <!-- Loading State -->
+                <div class="loading-spinner-box" id="interviewLoadingState">
+                    <i class="fa-solid fa-circle-notch fa-spin spinner"></i>
+                    <p id="interviewLoadingText">Generating customized interview questions with Eliora AI...</p>
+                </div>
+
+                <!-- Interactive Question Room State -->
+                <div class="interview-arena" id="interviewArena" style="display: none;">
+
+                    <!-- Left Column: Question & Speech Controls -->
+                    <div class="question-column">
+                        <div class="question-card">
+                            <div class="q-meta-row">
+                                <span class="q-category-pill" id="qCategoryPill">Icebreaker & Background</span>
+                                <button class="btn-speak-q" id="speakQuestionBtn" title="Replay Question Audio">
+                                    <i class="fa-solid fa-volume-high"></i> Speak Question
+                                </button>
+                            </div>
+                            <h2 class="question-text" id="questionText">Tell me about yourself and your background
+                                relevant to this Senior Software Engineer role?</h2>
+
+                            <!-- Expected Key Evaluation Points -->
+                            <div class="eval-points-box">
+                                <h4><i class="fa-solid fa-lightbulb"></i> Key Focus Areas for your Answer:</h4>
+                                <ul id="evalPointsList">
+                                    <li>Relevant technical stack experience</li>
+                                    <li>Key projects and achievements</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Audio Waveform Visualizer -->
+                        <div class="audio-wave-box" id="audioWaveBox">
+                            <div class="wave-bar bar-1"></div>
+                            <div class="wave-bar bar-2"></div>
+                            <div class="wave-bar bar-3"></div>
+                            <div class="wave-bar bar-4"></div>
+                            <div class="wave-bar bar-5"></div>
+                            <span class="wave-status-text" id="waveStatusText">Eliora speaking...</span>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Candidate Response Input & Live Feedback -->
+                    <div class="response-column">
+                        <div class="response-card">
+                            <div class="response-header">
+                                <h3><i class="fa-solid fa-microphone"></i> Candidate Response</h3>
+                                <button class="btn-mic-toggle" id="micToggleBtn">
+                                    <i class="fa-solid fa-microphone"></i> <span id="micBtnText">Start Voice
+                                        Input</span>
+                                </button>
+                            </div>
+                            <textarea id="candidateAnswerTextarea"
+                                placeholder="Type or speak your answer here... Eliora is listening."
+                                rows="6"></textarea>
+
+                            <div class="response-actions">
+                                <button type="button" class="btn-submit-answer" id="submitAnswerBtn">
+                                    <i class="fa-solid fa-paper-plane"></i> Submit Answer for AI Feedback
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Evaluation Feedback Result Box -->
+                        <div class="feedback-result-card" id="feedbackResultCard" style="display: none;">
+                            <div class="feedback-header">
+                                <h4><i class="fa-solid fa-award"></i> Live Evaluation Feedback</h4>
+                                <span class="score-badge" id="feedbackScoreBadge">8 / 10</span>
+                            </div>
+                            <div class="feedback-content">
+                                <p><strong><i class="fa-solid fa-circle-check text-success"></i> Strengths:</strong>
+                                    <span id="feedbackPositive">Great overview of leadership and architecture
+                                        background.</span>
+                                </p>
+                                <p><strong><i class="fa-solid fa-circle-exclamation text-warning"></i> Area for
+                                        Improvement:</strong> <span id="feedbackImprovement">Mention specific metrics or
+                                        impact from past engineering projects.</span></p>
+                            </div>
+                            <div class="next-q-row">
+                                <button type="button" class="btn-next-q" id="nextQuestionBtn">
+                                    Next Question <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Final Assessment Summary State -->
+                <div class="final-assessment-container" id="finalAssessmentContainer" style="display: none;">
+                    <div class="assessment-card">
+                        <div class="assessment-header">
+                            <i class="fa-solid fa-trophy trophy-icon"></i>
+                            <h2>Live AI HR Interview Complete!</h2>
+                            <p>Here is your comprehensive evaluation report compiled by Eliora AI Recruiter.</p>
+                        </div>
+                        <div class="assessment-grid" id="assessmentSummaryGrid">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                        <div class="assessment-actions">
+                            <button class="btn-secondary" id="restartInterviewBtn">
+                                <i class="fa-solid fa-rotate-right"></i> Restart Interview
+                            </button>
+                            <button class="btn-primary-launch" id="downloadReportBtn">
+                                <i class="fa-solid fa-download"></i> Download Full Interview Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

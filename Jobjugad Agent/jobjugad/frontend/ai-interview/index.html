@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobJugad - AI HR Interview Platform</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="/static/style.css?v=9">
+</head>
+<body class="light-theme">
+    <div class="app-container">
+        <!-- Radial Background Glows -->
+        <div class="bg-glow bg-glow-1"></div>
+        <div class="bg-glow bg-glow-2"></div>
+        <div class="bg-glow bg-glow-3"></div>
+
+        <!-- App Header & Navigation Bar -->
+        <header class="app-header glass">
+            <div class="logo-section">
+                <div class="logo-avatar-thumb">
+                    <img src="/static/avatar/female_recruiter.jpg" alt="Eliora AI HR" id="header-avatar-img">
+                </div>
+                <div class="logo-text-group">
+                    <h1 class="logo-title">JOB<span class="logo-accent">jugad</span></h1>
+                    <span class="logo-subtitle">AI HR Interview Platform</span>
+                </div>
+            </div>
+
+
+        </header>
+
+        <!-- Main Workspace Area -->
+        <main class="app-workspace">
+
+            <!-- AI INTERVIEW LAUNCH — intentionally minimal: candidate name / job
+                 title / question count come from the session (Setup), so there is
+                 nothing to configure here. The instructions modal opens
+                 automatically on load (see app.js loadInterviewContext()) and
+                 leads straight into the interview — this view is only ever seen
+                 for an instant, or if the candidate dismisses that modal. -->
+            <section class="view-tab active" id="view-setup">
+                <div class="setup-container">
+                    <div class="setup-header">
+                        <h2>Preparing your AI interview…</h2>
+                        <p>Using the résumé and job description already on file — no setup needed.</p>
+                    </div>
+
+                    <!-- SIMPLE LOADING SCREEN -->
+                    <div class="simple-loading-container" id="simple-loading-container">
+                        <div class="simple-loading-spinner"></div>
+                        <p class="simple-loading-text" id="simple-loading-text">
+                            Generating your interview questions<span class="dot-1">.</span><span class="dot-2">.</span><span class="dot-3">.</span>
+                        </p>
+                        
+                        <div class="simple-progress-bar-wrapper">
+                            <div class="simple-progress-bar-track">
+                                <div class="simple-progress-bar-fill" id="prep-progress-bar" style="width: 25%;"></div>
+                            </div>
+                            <span class="simple-progress-percent" id="prep-progress-percent">25%</span>
+                        </div>
+
+                        <div class="simple-error-state" id="prep-error-panel" style="display: none;">
+                            <p id="prep-error-msg">Connecting to AI took longer than expected.</p>
+                            <button class="btn-primary" onclick="retryInterviewGeneration()">🔄 Retry</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- TAB 3: LIVE AI INTERVIEW STAGE -->
+            <section class="view-tab" id="view-interview">
+                <div class="interview-stage-layout">
+
+                    <!-- Left Stage: AI Avatar Live Video Screen -->
+                    <div class="avatar-video-stage glass">
+                        <div class="stage-header-bar">
+                            <div class="interview-meta-badge">
+                                <span class="badge badge-amber" id="stage-job-title">Software Engineer</span>
+                                <span class="badge badge-blue" id="stage-question-counter">Question 1 of 10</span>
+                                <span class="badge badge-purple" id="proctoring-warning-badge" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; border-color: #f87171;">Warnings: 0/10</span>
+                            </div>
+                            <div class="recording-badge" id="rec-badge">
+                                <span class="rec-dot"></span>
+                                <span id="rec-timer">REC 00:00</span>
+                            </div>
+                        </div>
+
+                        <!-- Dual Side-by-Side Video Stage: Eliora AI Agent & Candidate Camera -->
+                        <div class="dual-video-stage-grid">
+                            <!-- Left Window: Eliora AI Agent -->
+                            <div class="video-window-card">
+                                <div class="video-window-header">
+                                    <span class="video-window-title">Eliora AI Agent</span>
+                                    <div class="avatar-status-pill" id="avatar-status-pill">
+                                        <span class="status-dot status-idle" id="avatar-status-dot"></span>
+                                        <span id="avatar-status-text">Ready</span>
+                                    </div>
+                                </div>
+                                <div class="avatar-screen-container">
+                                    <video id="ai-agent-video" src="/static/videos/female-ai.mp4" muted playsinline preload="auto" class="avatar-video-element"></video>
+                                </div>
+                            </div>
+
+                            <!-- Right Window: Candidate Camera -->
+                            <div class="video-window-card">
+                                <div class="video-window-header">
+                                    <span class="video-window-title">Candidate (You)</span>
+                                    <span class="badge badge-green">Camera Live</span>
+                                </div>
+                                <div class="candidate-camera-container">
+                                    <video id="candidate-webcam-video" autoplay muted playsinline class="candidate-video-element"></video>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live AI Speaking Subtitles Box -->
+                        <div class="subtitle-banner glass-nested" id="ai-subtitle-box" style="display: none;">
+                            <span class="subtitle-label">AI Agent Subtitle</span>
+                            <p id="ai-subtitle-text" class="subtitle-text"></p>
+                        </div>
+
+                        <!-- Audio Visualizer Waveform Bar & Timer Row -->
+                        <div class="timer-waveform-row">
+                            <div class="audio-visualizer-bar flex-1">
+                                <canvas id="live-waveform-canvas"></canvas>
+                            </div>
+
+                        </div>
+
+                        <!-- Dedicated Active Question Focus Window -->
+                        <div class="question-focus-window glass-nested" id="question-window-card">
+                            <div class="question-window-topbar">
+                                <div class="q-window-title">
+                                    <span class="q-window-icon">❓</span>
+                                    <span>Active Question Window</span>
+                                </div>
+                                <div class="q-step-dots-bar" id="q-step-dots-bar">
+                                    <!-- Dynamic Question Step Dots rendered in JS -->
+                                </div>
+                            </div>
+
+                            <div class="question-header-row">
+                                <span class="badge badge-purple" id="question-category-tag">Technical</span>
+                                <span class="text-muted" id="question-intent-tag">Assessing Technical Depth</span>
+                            </div>
+
+                            <div class="question-body-box">
+                                <h3 class="current-question-text" id="current-question-text">
+                                    Click "Start Question" to begin your interview session with the AI Agent.
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Stage: Live Transcript Feed & Mic Controls -->
+                    <div class="transcript-stage glass">
+                        <div class="transcript-header">
+                            <h3>Live Interview Transcript</h3>
+                            <span class="badge badge-green" id="mic-status-badge">Mic Active</span>
+                        </div>
+
+                        <!-- Scrollable Transcript Feed -->
+                        <div class="transcript-feed" id="transcript-feed">
+                            <div class="transcript-msg msg-system">
+                                <span class="msg-author">System</span>
+                                <p class="msg-body">Interview session initialized. Click "Start Conversation" to hear Eliora ask the first question.</p>
+                            </div>
+                        </div>
+
+                        <!-- Live Candidate Speech Dictation Box -->
+                        <div class="speech-dictation-preview" id="dictation-preview-box">
+                            <span class="dictation-label">Listening... (Speak naturally)</span>
+                            <p id="dictation-text" class="dictation-text">Waiting for candidate speech...</p>
+                        </div>
+
+                        <!-- Controls Panel -->
+                        <div class="interview-controls-panel">
+                            <div class="mic-button-row">
+                                <!-- Highlighted Dual-State Mic & Agent Status Button -->
+                                <button class="btn-mic state-listening" id="btn-toggle-mic" onclick="toggleMicRecording()" aria-live="polite">
+                                    <span class="btn-mic-indicator" id="btn-mic-indicator">
+                                        <span class="mic-icon-listen" title="AI Speaking - Listen carefully">
+                                            <svg class="icon-mic-svg" viewBox="0 0 24 24">
+                                                <path d="M12 3a9 9 0 0 0-9 9v7c0 1.1.9 2 2 2h1a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H4.1A7.002 7.002 0 0 1 12 5a7.002 7.002 0 0 1 7.9 6H18a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h1c1.1 0 2-.9 2-2v-7a9 9 0 0 0-9-9z"/>
+                                            </svg>
+                                        </span>
+                                        <span class="mic-icon-speak" title="Mic Active - Speak now">
+                                            <svg class="icon-mic-svg" viewBox="0 0 24 24">
+                                                <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+                                            </svg>
+                                        </span>
+                                        <span class="mic-live-pulse-dot"></span>
+                                    </span>
+                                    <span id="btn-mic-text" class="btn-mic-text">Listen Carefully Question</span>
+                                </button>
+                                <button class="btn-secondary" id="btn-repeat-question" onclick="repeatCurrentQuestion()">
+                                    🔊 Repeat Question
+                                </button>
+                                <button class="btn-next-question" id="btn-next-question" onclick="skipToNextQuestion()">
+                                    Next Question →
+                                </button>
+                                <button class="btn-primary-action" id="btn-submit-answer" onclick="submitCurrentAnswer()" style="display: none;">
+                                    Submit Answer & Next →
+                                </button>
+                            </div>
+
+                            <div class="control-toggles-row">
+                                <label class="checkbox-label" style="display: none;">
+                                    <input type="checkbox" id="chk-auto-voice" checked onchange="onAutoVoiceToggle()">
+                                    Continuous Auto-Voice Mode
+                                </label>
+                                <button class="btn-danger-sm" id="btn-end-interview" onclick="endInterviewSession()" style="display: none;">End Interview</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+
+            <!-- TAB 4: INTERVIEW COMPLETE -->
+            <section class="view-tab" id="view-report">
+                <div class="setup-container" id="report-printable-area">
+                    <div class="report-banner glass">
+                        <div class="report-candidate-meta">
+                            <h2 id="report-candidate-name">Candidate</h2>
+                            <p>✅ AI interview completed — your responses have been recorded.</p>
+                        </div>
+                    </div>
+                    <div class="report-card glass" style="text-align:center;">
+                        <h3 class="card-title">Next: Performance Report</h3>
+                        <div class="report-action-bar" style="justify-content:center;">
+                            <a class="btn-primary" href="/performance" style="text-decoration:none;display:inline-block;">Continue to Performance Report &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- SETTINGS DRAWER -->
+    <div class="drawer-overlay" id="settings-overlay" onclick="toggleSettingsDrawer(false)"></div>
+    <aside class="drawer glass" id="settings-drawer">
+        <div class="drawer-header">
+            <h3>Platform Settings</h3>
+            <button class="btn-icon" onclick="toggleSettingsDrawer(false)">✕</button>
+        </div>
+        <div class="drawer-body">
+            <div class="form-group">
+                <label for="groq-key-input">Groq API Key</label>
+                <input type="password" id="groq-key-input" class="form-input" placeholder="gsk_...">
+            </div>
+            <div class="form-group">
+                <label for="gemini-key-input">Gemini API Key</label>
+                <input type="password" id="gemini-key-input" class="form-input" placeholder="AIza...">
+            </div>
+            <div class="form-group">
+                <label for="voice-speaker-select">AI HR Voice Speaker</label>
+                <select id="voice-speaker-select" class="form-input">
+                    <option value="en-US-AriaNeural">en-US-AriaNeural (Professional Female)</option>
+                    <option value="en-US-JennyNeural">en-US-JennyNeural (Friendly Female)</option>
+                    <option value="en-GB-SoniaNeural">en-GB-SoniaNeural (British Female)</option>
+                </select>
+            </div>
+            <button class="btn-primary w-full" onclick="saveSettings()">Save Settings</button>
+        </div>
+    </aside>
+
+    <!-- RECORDING VIDEO PLAYER MODAL -->
+    <div class="modal-overlay" id="video-modal-overlay" onclick="closeVideoModal()">
+        <div class="modal-card glass" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="video-modal-title">Recorded Interview Session</h3>
+                <button class="btn-icon" onclick="closeVideoModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <video id="session-recording-player" controls class="video-player-element"></video>
+            </div>
+            <div class="modal-footer">
+                <a id="video-download-link" download="interview_session.webm" class="btn-secondary">Download Video (.webm)</a>
+                <button class="btn-primary" onclick="closeVideoModal()">Close Player</button>
+            </div>
+        </div>
+    </div>
+    <!-- PROCTORING WARNING MODAL REMOVED -->
+    <!-- INSTRUCTIONS MODAL -->
+    <!-- INSTRUCTIONS MODAL -->
+    <div class="modal-overlay instructions-modal-overlay" id="instructions-modal-overlay">
+        <div class="modal-card instructions-page-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <span style="font-size:1.6rem;display:flex;align-items:center;">🎙️</span>
+                    <div>
+                        <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;color:#0d6efd;font-weight:700;">JobJugad Assessment &bull; Round 3</div>
+                        <h3 style="margin:0; font-size: 1.35rem; color: #1e293b; font-weight: 700;">Live AI Interview Instructions &amp; Guidelines</h3>
+                    </div>
+                </div>
+                <div class="badge" style="font-size:0.82rem;padding:6px 14px;border-radius:20px;background:#ede9fe;color:#5b21b6;font-weight:700;display:inline-flex;align-items:center;gap:6px;">
+                    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8b5cf6;"></span>
+                    🛡️ AI Proctoring Active
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="instructions-inner-container">
+                    <p style="margin-top: 0; margin-bottom: 18px; color: #4b5563; font-size: 1.05rem; line-height: 1.6;">
+                        Please adhere to the following proctoring guidelines during your live AI HR interview:
+                    </p>
+                    <ol style="margin-left: 24px; color: #1e293b; padding-left: 0; font-size: 0.98rem; line-height: 1.75;">
+                        <li style="margin-bottom: 14px;"><strong>Object detection:</strong> Do not hold or use unauthorized objects. Ensure no other persons are in the frame.</li>
+                        <li style="margin-bottom: 14px;"><strong>Tab Switching prohibited:</strong> Do not navigate away from this tab or window.</li>
+                        <li style="margin-bottom: 14px;"><strong>Eye tracking:</strong> Keep your focus entirely on the screen and AI avatar.</li>
+                        <li style="margin-bottom: 14px;"><strong>Screen sharing prohibited:</strong> Do not share your screen or use secondary displays.</li>
+                        <li style="margin-bottom: 14px;"><strong>Voice Clarity:</strong> Speak clearly into your microphone when answering each question.</li>
+                    </ol>
+                    <div style="margin-top: 22px; padding: 14px 18px; background: #fef2f2; border-left: 4px solid #ef4444; border-radius: 8px; color: #991b1b; font-size: 0.95rem; font-weight: 600; display:flex; align-items:center; gap:8px;">
+                        <span>⚠️</span> Violation of these rules may trigger warnings. The interview will automatically terminate upon exceeding the warning limit.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeInstructionsModal()" style="padding:10px 22px;border-radius:8px;font-weight:600;">Cancel</button>
+                <button class="btn-primary" onclick="closeInstructionsModal(); generateAndStartInterview();" style="padding:10px 24px;border-radius:8px;font-weight:700;">I Understand &mdash; Start Interview &rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core App Logic -->
+    <script src="/static/app.js?v=9"></script>
+</body>
+</html>

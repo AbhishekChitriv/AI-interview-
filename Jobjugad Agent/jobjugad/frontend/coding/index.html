@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Round</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Monaco Editor (VS Code's editor component) for the Coding Round — editing only, no execution -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+    <link rel="stylesheet" href="/static/style.css?v=4">
+    <style>
+        /* Standalone-only tweaks */
+        .app-header.glass {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 22px; margin-bottom: 22px;
+        }
+        .cr-standalone-logo { display: flex; align-items: center; gap: 10px; font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; }
+        .cr-standalone-logo svg { width: 26px; height: 26px; fill: var(--primary-yellow); }
+        .cr-setup-form { display: flex; flex-direction: column; gap: 16px; margin-top: 8px; }
+        .cr-field { display: flex; flex-direction: column; gap: 6px; }
+        .cr-field label { font-size: 0.9rem; font-weight: 600; color: var(--text-main); }
+        .cr-field input, .cr-field textarea, .cr-field select {
+            font-family: var(--font-body); font-size: 0.92rem; padding: 10px 12px;
+            border: 1px solid var(--bg-card-border); border-radius: var(--radius-sm);
+            background: var(--bg-card-hover); color: var(--text-main); resize: vertical;
+        }
+        .cr-field textarea { min-height: 90px; }
+        .cr-field .cr-hint { font-size: 0.78rem; color: var(--text-muted); font-weight: 400; }
+        .cr-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 640px) { .cr-two-col { grid-template-columns: 1fr; } }
+        .cr-plan-callout {
+            padding: 12px 14px; border-radius: var(--radius-sm);
+            border: 1px solid var(--bg-card-border); background: var(--bg-card-hover);
+            font-size: 0.9rem; line-height: 1.5;
+        }
+        .cr-plan-callout .cr-plan-langs { font-weight: 700; }
+        .cr-plan-callout .cr-plan-pill {
+            display: inline-block; margin: 2px 4px 0 0; padding: 2px 9px;
+            border-radius: 999px; font-size: 0.76rem; font-weight: 700;
+            background: var(--primary-yellow-glow); color: var(--primary-yellow);
+        }
+        .cr-skill-pills { margin-top: 8px; }
+        .cr-skill-pills .cr-tag-pill { display: inline-block; margin: 3px 4px 0 0; }
+    </style>
+</head>
+<body class="light-theme">
+    <div class="app-container">
+        <header class="app-header glass">
+            <div class="cr-standalone-logo">
+                <svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                Coding Round
+            </div>
+            <span class="text-muted" style="font-size:0.85rem;">AI-generated · AI-reviewed · Proctored</span>
+        </header>
+
+        <main class="app-main">
+            <section class="view-tab active" id="view-coding">
+
+                <!-- Panel 1: Intro / Setup -->
+                <div class="setup-container" id="coding-intro">
+                    <div class="setup-header">
+                        <h2>Coding Round</h2>
+                        <p>5 hands-on coding questions generated from your resume and target role &mdash; increasing in difficulty. No code execution is available; your submitted code is reviewed and scored by AI.</p>
+                    </div>
+
+                    <div class="launch-card glass">
+                        <div class="assessment-info-grid">
+                            <div class="assessment-info-item">
+                                <span class="assessment-info-num" id="coding-info-count">5</span>
+                                <span class="assessment-info-label">Questions</span>
+                            </div>
+                            <div class="assessment-info-item">
+                                <span class="assessment-info-num" id="coding-info-time">01:00:00</span>
+                                <span class="assessment-info-label">Time Limit</span>
+                            </div>
+                            <div class="assessment-info-item">
+                                <span class="assessment-info-num">2E / 2M / 1H</span>
+                                <span class="assessment-info-label">Difficulty Mix</span>
+                            </div>
+                            <div class="assessment-info-item">
+                                <span class="assessment-info-num">Run &amp; Test</span>
+                                <span class="assessment-info-label">Interactive Compiler</span>
+                            </div>
+                        </div>
+
+                        <div class="cr-setup-form" id="cr-setup-form">
+                            <div class="cr-field">
+                                <label for="cr-role-select">Target Job Role</label>
+                                <select id="cr-role-select" onchange="onRoleChange()"></select>
+                                <span class="cr-hint">Pre-filled from your resume &mdash; change it if you're targeting a different role. This drives which language(s) the round tests.</span>
+                            </div>
+                            <div class="cr-field" id="cr-role-other-field" hidden>
+                                <label for="cr-role-other">Enter your target role</label>
+                                <input type="text" id="cr-role-other" placeholder="e.g. Data Analyst, Backend Developer" oninput="onRoleChange()">
+                            </div>
+                            <div class="cr-plan-callout" id="cr-plan-callout">
+                                <span class="cr-hint">Checking&hellip;</span>
+                            </div>
+
+                            <!-- session-populated / server-fallback fields, kept out of the way -->
+                            <input type="hidden" id="cr-cand-name">
+                            <input type="hidden" id="cr-target-role">
+                            <input type="hidden" id="cr-resume-text">
+                            <input type="hidden" id="cr-jd-text">
+                            <input type="hidden" id="cr-groq-key">
+                        </div>
+
+                        <ul class="assessment-rules">
+                            <li>Questions are <strong>pure coding problems</strong> generated from your resume and the target role you pick &mdash; e.g. a Data Analyst is tested on <strong>SQL + Python</strong>, a Data Scientist on Python, and a Full Stack / Backend / Software Engineer on <strong>the main programming language on their resume</strong> (Java, Python, C#, JavaScript&hellip;).</li>
+                            <li>The timer starts as soon as you begin and auto-submits when it reaches zero.</li>
+                            <li>You can navigate freely between questions using Previous/Next or question tabs, and edit your code before submitting.</li>
+                            <li>AI proctoring monitors face presence, looking away, multiple persons, prohibited devices, and tab switching throughout the round.</li>
+                            <li>You can use the <strong>Run</strong> button anytime to compile and test your code against test cases before submitting.</li>
+                        </ul>
+
+                        <button class="btn-primary-lg w-full" id="btn-start-coding" onclick="startCodingRound()">
+                            <svg class="icon-lg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                            Start Coding Round
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Live coding interface (IDE-style split view) -->
+                <div class="cr-shell" id="coding-live" style="display: none;">
+
+                    <div class="cr-topbar">
+                        <div class="cr-brand">
+                            <svg class="cr-brand-icon" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                            Coding Round
+                            <span class="cr-chip">Coding Challenge</span>
+                        </div>
+                        <div class="cr-topbar-right">
+                            <span class="cr-candidate-pill" id="coding-cand-name">Candidate</span>
+                            <span class="cr-timer-pill" id="coding-timer">01:00:00</span>
+                        </div>
+                    </div>
+
+                    <div class="cr-body">
+                        <div class="cr-problem-pane">
+                            <div class="cr-problem-topline">
+                                <button type="button" class="cr-q-selector" id="btn-coding-q-selector" onclick="toggleCodingQuestionMenu()">
+                                    <span id="coding-q-title-full">1. Question Title</span>
+                                    <svg class="cr-chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                                </button>
+                                <span class="cr-diff-badge" id="coding-difficulty-tag">Easy</span>
+                            </div>
+                            <div class="cr-problem-meta" id="coding-progress-tag">5 problems</div>
+
+                            <div class="cr-q-menu" id="coding-q-menu" style="display:none;"></div>
+
+                            <div class="cr-q-palette" id="coding-q-palette"></div>
+
+                            <div class="cr-tags-row" id="coding-tags-row"></div>
+
+                            <div class="cr-problem-scroll">
+                                <p class="cr-problem-text" id="coding-question-text">Loading question&hellip;</p>
+
+                                <div class="cr-spec-block" id="coding-input-block">
+                                    <h4>Input</h4>
+                                    <p id="coding-input-format"></p>
+                                </div>
+                                <div class="cr-spec-block" id="coding-output-block">
+                                    <h4>Output</h4>
+                                    <p id="coding-output-format"></p>
+                                </div>
+                                <div class="cr-spec-block" id="coding-example-block">
+                                    <h4>Example</h4>
+                                    <div class="cr-example-box">
+                                        <div><span class="cr-example-label">Input</span><code id="coding-example-input"></code></div>
+                                        <div><span class="cr-example-label">Output</span><code id="coding-example-output"></code></div>
+                                    </div>
+                                </div>
+                                <div class="cr-spec-block">
+                                    <h4>What we're evaluating</h4>
+                                    <ul class="cr-eval-list" id="coding-eval-points-list"></ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="cr-editor-pane">
+                            <div class="cr-editor-topbar">
+                                <span class="cr-filename" id="coding-filename">solution.py</span>
+                                <div class="cr-editor-actions">
+                                    <div class="cr-lang-select-wrap">
+                                        <select id="coding-lang-select" class="cr-lang-select" onchange="onCodingLanguageChange(this.value)" title="Choose programming language">
+                                            <option value="Python">Python</option>
+                                            <option value="JavaScript">JavaScript</option>
+                                            <option value="TypeScript">TypeScript</option>
+                                            <option value="Java">Java</option>
+                                            <option value="C++">C++</option>
+                                            <option value="C#">C#</option>
+                                            <option value="C">C</option>
+                                            <option value="SQL">SQL</option>
+                                            <option value="Go">Go</option>
+                                            <option value="Rust">Rust</option>
+                                            <option value="PHP">PHP</option>
+                                            <option value="Ruby">Ruby</option>
+                                            <option value="Kotlin">Kotlin</option>
+                                            <option value="Swift">Swift</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" class="cr-btn-run" id="btn-coding-run" onclick="runCurrentCode()" title="Compile and Run code">
+                                        <svg viewBox="0 0 24 24" class="cr-run-icon"><path d="M8 5v14l11-7z"/></svg>
+                                        <span>Run</span>
+                                    </button>
+                                    <button type="button" class="cr-btn-outline" id="btn-coding-reset" onclick="resetCodingStarter()">Reset</button>
+                                </div>
+                            </div>
+                            <div class="code-editor-mount" id="coding-editor"></div>
+                            <div class="cr-console" id="coding-console">
+                                <div class="cr-console-header">
+                                    <div class="cr-console-tabs">
+                                        <button type="button" class="cr-console-tab active" id="cr-tab-output" onclick="switchConsoleTab('output')">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8h16v10zm-2-1h-4v-2h4v2zm-6-2.5l-3-3 1.4-1.4 1.6 1.6 4.6-4.6 1.4 1.4-6 6z"/></svg>
+                                            Test Output
+                                        </button>
+                                        <button type="button" class="cr-console-tab" id="cr-tab-stdin" onclick="switchConsoleTab('stdin')">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                                            Custom Input
+                                        </button>
+                                    </div>
+                                    <div class="cr-console-status-group">
+                                        <span class="cr-status-badge cr-status-idle" id="coding-run-status">Ready</span>
+                                        <span class="cr-run-time" id="coding-run-time"></span>
+                                        <button type="button" class="cr-console-action-btn" title="Clear Console" onclick="clearConsole()">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                                        </button>
+                                        <button type="button" class="cr-console-action-btn" id="btn-console-toggle" title="Toggle Console size" onclick="toggleConsoleSize()">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" id="icon-console-toggle"><path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="cr-console-body">
+                                    <div class="cr-console-panel active" id="cr-panel-output">
+                                        <div class="cr-test-compare" id="coding-test-compare" style="display:none;">
+                                            <div class="cr-compare-box">
+                                                <span class="cr-compare-label">Expected Output:</span>
+                                                <pre class="cr-compare-val" id="coding-expected-output"></pre>
+                                            </div>
+                                            <div class="cr-compare-box">
+                                                <span class="cr-compare-label">Your Output:</span>
+                                                <pre class="cr-compare-val" id="coding-actual-output"></pre>
+                                            </div>
+                                        </div>
+                                        <pre class="cr-console-terminal" id="coding-output-terminal">Click "Run" to compile and execute your code.</pre>
+                                    </div>
+                                    <div class="cr-console-panel" id="cr-panel-stdin" style="display:none;">
+                                        <textarea id="coding-stdin-input" class="cr-stdin-box" placeholder="Enter standard input (stdin) for your program here..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cr-footer">
+                        <span class="cr-footer-progress" id="coding-solved-count">0 of 5 written</span>
+                        <div class="cr-footer-actions">
+                            <button type="button" class="cr-btn-outline" id="btn-coding-prev" onclick="codingPrev()">Previous</button>
+                            <button type="button" class="cr-btn-outline" id="btn-coding-save" onclick="codingSaveNext()">Save &amp; Next</button>
+                            <button type="button" class="cr-btn-finish" id="btn-coding-submit" onclick="submitCodingRound()">Finish Round</button>
+                        </div>
+                    </div>
+
+                    <div class="assess-proctor-cam" id="coding-proctor-cam">
+                        <div class="assess-proctor-head">
+                            <span class="assess-proctor-rec"><i></i> AI PROCTORING</span>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <span id="coding-proctor-warns">Warnings: 0/10</span>
+                                <button type="button" class="assess-proctor-center-btn" title="Reset camera to middle" onclick="if(window.repositionCodingProctorCam) window.repositionCodingProctorCam(true)">&#x21bb;</button>
+                            </div>
+                        </div>
+                        <video id="coding-webcam-video" autoplay muted playsinline></video>
+                        <div class="assess-proctor-status" id="coding-proctor-status">Initialising camera&hellip;</div>
+                    </div>
+                </div>
+
+                <!-- Panel 3: Results -->
+                <div class="setup-container" id="coding-results" style="display: none;">
+                    <div class="report-banner glass">
+                        <div class="report-candidate-meta">
+                            <h2 id="coding-result-name">Candidate</h2>
+                            <p>&#9989; Coding round submitted.</p>
+                        </div>
+                    </div>
+                    <div class="report-card glass" style="text-align:center;">
+                        <h3 class="card-title">Next: Interview Round</h3>
+                        <div class="report-action-bar" style="justify-content:center;">
+                            <a class="btn-primary" href="/ai-interview" style="text-decoration:none;display:inline-block;">Proceed to Interview Round &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <!-- CODING ROUND RULES & PROCTORING MODAL -->
+    <!-- CODING ROUND RULES & PROCTORING MODAL -->
+    <div class="modal-overlay instructions-modal-overlay" id="coding-instructions-overlay">
+        <div class="modal-card instructions-page-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <span style="font-size:1.6rem;display:flex;align-items:center;">💻</span>
+                    <div>
+                        <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;color:#1553a9;font-weight:700;">JobJugad Assessment &bull; Round 2</div>
+                        <h3 style="margin:0; font-size: 1.35rem; color: #1e293b; font-weight: 700;">Coding Round Instructions &amp; Proctoring Rules</h3>
+                    </div>
+                </div>
+                <div class="badge" style="font-size:0.82rem;padding:6px 14px;border-radius:20px;background:#ede9fe;color:#5b21b6;font-weight:700;display:inline-flex;align-items:center;gap:6px;">
+                    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8b5cf6;"></span>
+                    🛡️ AI Proctoring Active
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="instructions-inner-container">
+                    <p style="margin-top: 0; margin-bottom: 18px; color: #4b5563; font-size: 1.05rem; line-height: 1.6;">
+                        Please review the guidelines carefully before starting your hands-on coding challenge:
+                    </p>
+                    <ol style="margin-left: 22px; color: #1e293b; padding-left: 0; font-size: 0.98rem; line-height: 1.75;">
+                        <li style="margin-bottom: 14px;"><strong>5 Role-Specific Problems:</strong> Questions are generated tailored to your resume and target role (2 Easy, 2 Moderate, 1 Hard).</li>
+                        <li style="margin-bottom: 14px;"><strong>Free Navigation &amp; Edits:</strong> Use the <strong>Previous</strong> and <strong>Save &amp; Next</strong> buttons or direct <strong>Q1&ndash;Q5 tabs</strong> to edit your code anytime before final submission.</li>
+                        <li style="margin-bottom: 14px;"><strong>Interactive Run &amp; Test:</strong> Write and test your code using the <strong>Run</strong> button. When confident, submit for final AI scoring and feedback.</li>
+                        <li style="margin-bottom: 14px;"><strong>AI Proctoring Active:</strong> Your camera must stay on. Looking away repeatedly, missing face, second person, or prohibited devices (cell phones, secondary laptops, tablets, books) will trigger warnings.</li>
+                        <li style="margin-bottom: 14px;"><strong>No Tab Switching:</strong> Leaving or minimising this browser window is recorded as a violation.</li>
+                        <li style="margin-bottom: 14px;"><strong>Time Limit:</strong> 60 minutes. The round automatically submits when the timer reaches zero or after 10 warnings.</li>
+                    </ol>
+                    <div style="margin-top: 22px; padding: 14px 18px; background: #fef2f2; border-left: 4px solid #ef4444; border-radius: 8px; color: #991b1b; font-size: 0.95rem; font-weight: 600; display:flex; align-items:center; gap:8px;">
+                        <span>⚠️</span> Ensure your camera is enabled and you are in a quiet, well-lit room.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="cancelCodingStart()" style="padding:10px 22px;border-radius:8px;font-weight:600;">Cancel</button>
+                <button class="btn-primary" onclick="confirmCodingStart()" style="padding:10px 24px;border-radius:8px;font-weight:700;">I Understand &mdash; Start Coding Round &rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js?v=4"></script>
+</body>
+</html>

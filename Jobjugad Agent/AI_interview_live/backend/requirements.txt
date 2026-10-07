@@ -1,0 +1,6 @@
+# Aptitude round — backend dependencies
+fastapi
+uvicorn
+pydantic
+openai            # used only as an OpenAI-compatible client for the Groq endpoint
+python-dotenv

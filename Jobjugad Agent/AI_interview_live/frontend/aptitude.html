@@ -1,0 +1,202 @@
+<!-- ============================================================================
+     APTITUDE & REASONING ROUND  —  HTML fragments
+     Paste each fragment into the matching spot in your own page.
+     Requires: aptitude.css, aptitude.js, and a switchNavTab(name) router.
+     ============================================================================ -->
+
+<!-- 1) NAV TAB BUTTON  → put inside your <nav> tab bar ----------------------- -->
+                <button class="nav-tab" id="tab-btn-assessment" onclick="switchNavTab('assessment')">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+                    Aptitude Test
+                </button>
+
+<!-- 2) TAB VIEW  → put alongside your other <section class="view-tab"> blocks -->
+<!--    NOTE: original markup uses id="view-assessment" + class="view-tab";     -->
+<!--    the button above calls switchNavTab('assessment').                       -->
+            <!-- TAB: APTITUDE & REASONING ASSESSMENT -->
+            <section class="view-tab" id="view-assessment">
+
+                <!-- Panel 1: Intro / Start -->
+                <div class="setup-container" id="assessment-intro">
+                    <div class="setup-header">
+                        <h2>Aptitude &amp; Logical Reasoning Assessment</h2>
+                        <p>A timed 20-question multiple-choice test: 10 Quantitative Aptitude questions and 10 Logical Reasoning questions.</p>
+                    </div>
+
+                    <div class="launch-card glass">
+                        <div class="assessment-info-grid">
+                            <div class="assessment-info-item">
+                                <span class="assessment-info-num" id="assess-info-count">20</span>
+                                <span class="assessment-info-label">Questions</span>
+                            </div>
+                            <div class="assessment-info-item">
+                                <span class="assessment-info-num" id="assess-info-time">00:30:00</span>
+                                <span class="assessment-info-label">Time Limit</span>
+                            </div>
+                            <div class="assessment-info-item">
+                                <span class="assessment-info-num">2</span>
+                                <span class="assessment-info-label">Sections</span>
+                            </div>
+                            <div class="assessment-info-item">
+                                <span class="assessment-info-num">MCQ</span>
+                                <span class="assessment-info-label">Single Correct</span>
+                            </div>
+                        </div>
+
+                        <ul class="assessment-rules">
+                            <li>The timer starts as soon as you begin and auto-submits when it reaches zero.</li>
+                            <li>You can navigate freely between questions and change answers before submitting.</li>
+                            <li>Questions 1&ndash;10 cover Quantitative Aptitude; questions 11&ndash;20 cover Logical Reasoning.</li>
+                            <li>Every question has exactly one correct option. Unanswered questions score zero.</li>
+                        </ul>
+
+                        <button class="btn-primary-lg w-full" id="btn-start-assessment" onclick="startAssessment()">
+                            <svg class="icon-lg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                            Start Assessment
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Live Test (exam interface) -->
+                <div class="exam-shell" id="assessment-live" style="display: none;">
+
+                    <div class="exam-header">
+                        <div class="exam-title" id="exam-title">Aptitude &amp; Reasoning Examination</div>
+                        <div class="exam-candidate">
+                            <span id="exam-cand-name">Candidate Name: <strong>Candidate</strong></span>
+                        </div>
+                        <div class="exam-time-box">TIME LEFT: <span id="assess-timer">00:30:00</span></div>
+                    </div>
+
+                    <div class="exam-subbar">QUESTION NUMBER BOXES</div>
+
+                    <div class="exam-main">
+                        <aside class="exam-palette-col">
+                            <div class="exam-palette-grid" id="assess-palette"></div>
+                            <div class="exam-legend">
+                                <span><i class="lg lg-answered"></i> answered</span>
+                                <span><i class="lg lg-review"></i> review</span>
+                                <span><i class="lg lg-not"></i> not answered</span>
+                            </div>
+                        </aside>
+
+                        <section class="exam-question-pane">
+                            <div class="exam-question-topbar">
+                                <span class="exam-section-label">Section:&nbsp;<strong id="assess-section-tag">Aptitude</strong></span>
+                                <span class="exam-progress" id="assess-progress-tag">Question 1 of 20</span>
+                            </div>
+
+                            <div class="exam-question-scroll">
+                                <div class="exam-q-meta">
+                                    <span class="text-muted" id="assess-q-subtopic">General</span>
+                                </div>
+                                <p class="exam-question-text" id="assess-question-text">Loading question&hellip;</p>
+                                <div class="exam-options" id="assess-options"></div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="exam-footer">
+                        <button type="button" class="exam-btn exam-btn-outline" id="btn-assess-clear" onclick="assessmentClearAnswer()">CLEAR RESPONSE</button>
+                        <button type="button" class="exam-btn exam-btn-outline" id="btn-assess-review" onclick="assessmentToggleReview()">MARK FOR REVIEW</button>
+                        <button type="button" class="exam-btn exam-btn-save" id="btn-assess-save" onclick="assessmentSaveNext()">SAVE &amp; NEXT</button>
+                        <button type="button" class="exam-btn exam-btn-submit" id="btn-assess-submit" onclick="submitAssessment()">SUBMIT TEST</button>
+                    </div>
+
+                    <!-- AI Proctoring camera window -->
+                    <div class="assess-proctor-cam" id="assess-proctor-cam">
+                        <div class="assess-proctor-head">
+                            <span class="assess-proctor-rec"><i></i> AI PROCTORING</span>
+                            <span id="assess-proctor-warns">Warnings: 0/10</span>
+                        </div>
+                        <video id="assess-webcam-video" autoplay muted playsinline></video>
+                        <div class="assess-proctor-status" id="assess-proctor-status">Initialising camera&hellip;</div>
+                    </div>
+                </div>
+
+                <!-- Panel 3: Results -->
+                <div class="setup-container" id="assessment-results" style="display: none;">
+                    <div class="report-banner glass">
+                        <div class="report-candidate-meta">
+                            <h2 id="assess-result-name">Candidate</h2>
+                            <p id="assess-result-verdict">Assessment Complete</p>
+                            <span class="text-muted" id="assess-result-time">Time taken: --</span>
+                        </div>
+                        <div class="report-score-box">
+                            <div class="score-circle-lg">
+                                <span class="score-num" id="assess-result-score">--</span>
+                                <span class="score-sub">%</span>
+                            </div>
+                            <span class="rec-badge-lg" id="assess-result-correct">0 / 20 correct</span>
+                        </div>
+                    </div>
+
+                    <div class="report-card glass">
+                        <h3 class="card-title">Section Breakdown</h3>
+                        <div class="assessment-breakdown-grid" id="assess-breakdown-grid"></div>
+                    </div>
+
+                    <div class="report-card glass">
+                        <h3 class="card-title">Assessor Summary</h3>
+                        <p class="summary-paragraph" id="assess-result-summary"></p>
+                    </div>
+
+                    <div class="report-card glass">
+                        <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;"><span>📝</span> Question-by-Question Review</h3>
+                        <p class="card-subtitle">Your choice, the correct answer, and a full worked solution for every question</p>
+                        <div class="assessment-review-list" id="assess-review-list"></div>
+                    </div>
+
+                    <div class="report-action-bar">
+                        <button class="btn-primary" onclick="restartAssessment()">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+                            Take a New Assessment
+                        </button>
+                        <button class="btn-secondary" onclick="switchNavTab('dashboard')">Back to Dashboard</button>
+                    </div>
+                </div>
+
+            </section>
+
+<!-- 3) RULES / PROCTORING MODAL  → put near the end of <body> --------------- -->
+<!-- 3) RULES / PROCTORING MODAL  → put near the end of <body> --------------- -->
+    <!-- ASSESSMENT RULES & PROCTORING MODAL -->
+    <div class="modal-overlay instructions-modal-overlay" id="assessment-instructions-overlay">
+        <div class="modal-card instructions-page-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <span style="font-size:1.6rem;display:flex;align-items:center;">📋</span>
+                    <div>
+                        <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;color:#1553a9;font-weight:700;">JobJugad Assessment &bull; Round 1</div>
+                        <h3 style="margin:0;font-size:1.35rem;color:#1e293b;font-weight:700;">Aptitude &amp; Reasoning Assessment Rules &amp; Proctoring Notice</h3>
+                    </div>
+                </div>
+                <div class="badge badge-purple" style="font-size:0.82rem;padding:6px 14px;border-radius:20px;background:#ede9fe;color:#5b21b6;font-weight:700;display:inline-flex;align-items:center;gap:6px;">
+                    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8b5cf6;"></span>
+                    🛡️ AI Proctoring Active
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="instructions-inner-container">
+                    <p style="margin-top: 0; margin-bottom: 18px; color: #4b5563; font-size: 1.05rem; line-height: 1.6;">
+                        This is an <strong>AI-proctored assessment</strong>. Your webcam must stay on for the entire duration and the AI monitor will flag any of the following:
+                    </p>
+                    <ol style="margin-left: 22px; color: #1e293b; padding-left: 0; font-size: 0.98rem; line-height: 1.75;">
+                        <li style="margin-bottom: 14px;"><strong>Sit in a well-lit, quiet space.</strong> Make sure your face is clearly visible with good lighting, enough room, and only one person &mdash; you &mdash; present.</li>
+                        <li style="margin-bottom: 14px;"><strong>No tab or window switching.</strong> Leaving or minimising this tab is recorded as a violation.</li>
+                        <li style="margin-bottom: 14px;"><strong>No phones or gadgets.</strong> Mobile phones, tablets, smart watches, laptops, or books visible in the camera will be flagged.</li>
+                        <li style="margin-bottom: 14px;"><strong>Stay alone in the frame.</strong> A second person detected on camera is a violation.</li>
+                        <li style="margin-bottom: 14px;"><strong>Face the screen.</strong> Keep your face visible; repeatedly looking away is flagged.</li>
+                        <li style="margin-bottom: 14px;"><strong>Do not refresh or close</strong> the page during the assessment.</li>
+                    </ol>
+                    <div style="margin-top: 22px; padding: 14px 18px; background: #fef2f2; border-left: 4px solid #ef4444; border-radius: 8px; color: #991b1b; font-size: 0.95rem; font-weight: 600; display:flex; align-items:center; gap:8px;">
+                        <span>⚠️</span> After 10 warnings the assessment is submitted automatically. The 30-minute timer starts now and cannot be paused.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="cancelAssessmentStart()" style="padding:10px 22px;border-radius:8px;font-weight:600;">Cancel</button>
+                <button class="btn-primary" onclick="confirmAssessmentStart()" style="padding:10px 24px;border-radius:8px;font-weight:700;">I Understand &mdash; Start Assessment &rarr;</button>
+            </div>
+        </div>
+    </div>

@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aptitude Round — Demo</title>
+<link rel="stylesheet" href="/static/aptitude.css">
+<style>
+  body{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:0;background:#eef1f5;color:#1f2430}
+  header{background:#1553a9;color:#fff;padding:14px 22px;font-weight:700}
+  nav{display:flex;gap:8px;padding:12px 22px;background:#fff;border-bottom:1px solid #e2e5ea}
+  .nav-tab{border:1px solid #d0d5dd;background:#f6f7f9;padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;display:flex;align-items:center;gap:6px}
+  .nav-tab.active{background:#1553a9;color:#fff;border-color:#1553a9}
+  .nav-tab .icon{width:16px;height:16px;fill:currentColor}
+  main{padding:22px;max-width:1100px;margin:0 auto}
+  .view-tab{display:none}
+  .view-tab.active{display:block}
+  .setup-container,.launch-card,.glass{background:#fff;border:1px solid #e2e5ea;border-radius:12px;padding:22px;margin-bottom:18px}
+  .setup-header h2{margin:.2em 0}
+  .btn-primary,.btn-primary-lg,.btn-secondary{font:inherit;font-weight:700;border:0;border-radius:8px;padding:12px 18px;cursor:pointer}
+  .btn-primary,.btn-primary-lg{background:#1553a9;color:#fff}
+  .btn-secondary{background:#e5e7eb;color:#1f2430}
+  .w-full{width:100%}
+  .icon-lg{width:20px;height:20px;fill:currentColor;vertical-align:-4px;margin-right:6px}
+  .modal-overlay{display:none;position:fixed;inset:0;align-items:center;justify-content:center;padding:20px}
+  .modal-overlay.open{display:flex}
+  .modal-card{background:#fff;border-radius:14px;max-width:640px;width:100%}
+  .modal-header,.modal-footer{padding:16px 22px}
+  .modal-footer{display:flex}
+
+  /* ── 100% FULL-SCREEN INSTRUCTIONS PAGE ── */
+  #assessment-instructions-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 100000 !important;
+    background: #f8fafc !important;
+    display: none;
+    flex-direction: column !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+  #assessment-instructions-overlay.open { display: flex !important; }
+  #assessment-instructions-overlay .modal-card {
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: #f8fafc !important;
+    box-sizing: border-box !important;
+    flex: 1 1 100% !important;
+    overflow: hidden !important;
+  }
+  #assessment-instructions-overlay .modal-header {
+    flex-shrink: 0 !important;
+    min-height: 72px !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 16px 36px !important;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05) !important;
+    z-index: 10 !important;
+    box-sizing: border-box !important;
+  }
+  #assessment-instructions-overlay .modal-body {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    padding: 36px 24px 44px !important;
+    box-sizing: border-box !important;
+    background: #f8fafc !important;
+  }
+  #assessment-instructions-overlay .modal-footer {
+    flex-shrink: 0 !important;
+    min-height: 72px !important;
+    background: #ffffff !important;
+    border-top: 1px solid #e2e8f0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding: 14px 36px !important;
+    gap: 14px !important;
+    box-shadow: 0 -2px 10px rgba(15, 23, 42, 0.04) !important;
+    z-index: 10 !important;
+    box-sizing: border-box !important;
+  }
+  #assessment-instructions-overlay .modal-body::-webkit-scrollbar { width: 8px; }
+  #assessment-instructions-overlay .modal-body::-webkit-scrollbar-track { background: #f1f5f9; }
+  #assessment-instructions-overlay .modal-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  #assessment-instructions-overlay .modal-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  .instructions-inner-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 32px 40px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  }
+  .report-banner,.report-card{background:#fff;border:1px solid #e2e5ea;border-radius:12px;padding:20px;margin-bottom:16px}
+  .score-circle-lg{font-size:2.4rem;font-weight:800}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.75rem;font-weight:700}
+  .badge-green{background:#dcfce7;color:#166534}.badge-red{background:#fee2e2;color:#991b1b}.badge-purple{background:#ede9fe;color:#5b21b6}
+  .text-green{color:#166534}.text-amber{color:#b45309}.text-muted{color:#6b7280}
+</style>
+</head>
+<body>
+<header>Aptitude &amp; Reasoning Round — standalone demo</header>
+<nav>
+  <button class="nav-tab active" id="tab-btn-home" onclick="switchNavTab('home')">Home</button>
+                <button class="nav-tab" id="tab-btn-assessment" onclick="switchNavTab('assessment')">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+                    Aptitude Test
+                </button>
+</nav>
+<main>
+  <section class="view-tab active" id="view-home">
+    <div class="setup-container">
+      <h2>Demo harness</h2>
+      <p>This page mounts only the extracted aptitude round. Click <b>Aptitude Test</b> above, then <b>Start Assessment</b>.</p>
+      <p class="text-muted">No <code>GROQ_API_KEY</code> set → questions come from the built-in curated bank.</p>
+    </div>
+  </section>
+            <!-- TAB: APTITUDE & REASONING ASSESSMENT -->
+            <section class="view-tab" id="view-assessment">
+
+                <!-- Panel 1: Intro / Start -->
+                <div class="setup-container" id="assessment-intro">
+                    <div class="setup-header">
+                        <h2>Aptitude &amp; Logical Reasoning Assessment</h2>
+                        <p>A timed 20-question multiple-choice test: 10 Quantitative Aptitude questions and 10 Logical Reasoning questions.</p>
+                    </div>
+
+                    <div class="launch-card glass">
+                        <div class="assessment-info-grid">
+                            <div class="assessment-info-item">
+                                <span class="assessment-info-num" id="assess-info-count">20</span>
+                                <span class="assessment-info-label">Questions</span>
+                            </div>
+                            <div class="assessment-info-item">
+                                <span class="assessment-info-num" id="assess-info-time">00:30:00</span>
+                                <span class="assessment-info-label">Time Limit</span>
+                            </div>
+                            <div class="assessment-info-item">
+                                <span class="assessment-info-num">2</span>
+                                <span class="assessment-info-label">Sections</span>
+                            </div>
+                            <div class="assessment-info-item">
+                                <span class="assessment-info-num">MCQ</span>
+                                <span class="assessment-info-label">Single Correct</span>
+                            </div>
+                        </div>
+
+                        <ul class="assessment-rules">
+                            <li>The timer starts as soon as you begin and auto-submits when it reaches zero.</li>
+                            <li>You can navigate freely between questions and change answers before submitting.</li>
+                            <li>Questions 1&ndash;10 cover Quantitative Aptitude; questions 11&ndash;20 cover Logical Reasoning.</li>
+                            <li>Every question has exactly one correct option. Unanswered questions score zero.</li>
+                        </ul>
+
+                        <button class="btn-primary-lg w-full" id="btn-start-assessment" onclick="startAssessment()">
+                            <svg class="icon-lg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                            Start Assessment
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Live Test (exam interface) -->
+                <div class="exam-shell" id="assessment-live" style="display: none;">
+
+                    <div class="exam-header">
+                        <div class="exam-title" id="exam-title">Aptitude &amp; Reasoning Examination</div>
+                        <div class="exam-candidate">
+                            <span id="exam-cand-name">Candidate Name: <strong>Candidate</strong></span>
+                        </div>
+                        <div class="exam-time-box">TIME LEFT: <span id="assess-timer">00:30:00</span></div>
+                    </div>
+
+                    <div class="exam-subbar">QUESTION NUMBER BOXES</div>
+
+                    <div class="exam-main">
+                        <aside class="exam-palette-col">
+                            <div class="exam-palette-grid" id="assess-palette"></div>
+                            <div class="exam-legend">
+                                <span><i class="lg lg-answered"></i> answered</span>
+                                <span><i class="lg lg-review"></i> review</span>
+                                <span><i class="lg lg-not"></i> not answered</span>
+                            </div>
+                        </aside>
+
+                        <section class="exam-question-pane">
+                            <div class="exam-question-topbar">
+                                <span class="exam-section-label">Section:&nbsp;<strong id="assess-section-tag">Aptitude</strong></span>
+                                <span class="exam-progress" id="assess-progress-tag">Question 1 of 20</span>
+                            </div>
+
+                            <div class="exam-question-scroll">
+                                <div class="exam-q-meta">
+                                    <span class="text-muted" id="assess-q-subtopic">General</span>
+                                </div>
+                                <p class="exam-question-text" id="assess-question-text">Loading question&hellip;</p>
+                                <div class="exam-options" id="assess-options"></div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="exam-footer">
+                        <button type="button" class="exam-btn exam-btn-outline" id="btn-assess-clear" onclick="assessmentClearAnswer()">CLEAR RESPONSE</button>
+                        <button type="button" class="exam-btn exam-btn-outline" id="btn-assess-review" onclick="assessmentToggleReview()">MARK FOR REVIEW</button>
+                        <button type="button" class="exam-btn exam-btn-save" id="btn-assess-save" onclick="assessmentSaveNext()">SAVE &amp; NEXT</button>
+                        <button type="button" class="exam-btn exam-btn-submit" id="btn-assess-submit" onclick="submitAssessment()">SUBMIT TEST</button>
+                    </div>
+
+                    <!-- AI Proctoring camera window -->
+                    <div class="assess-proctor-cam" id="assess-proctor-cam">
+                        <div class="assess-proctor-head">
+                            <span class="assess-proctor-rec"><i></i> AI PROCTORING</span>
+                            <span id="assess-proctor-warns">Warnings: 0/10</span>
+                        </div>
+                        <video id="assess-webcam-video" autoplay muted playsinline></video>
+                        <div class="assess-proctor-status" id="assess-proctor-status">Initialising camera&hellip;</div>
+                    </div>
+                </div>
+
+                <!-- Panel 3: Results -->
+                <div class="setup-container" id="assessment-results" style="display: none;">
+                    <div class="report-banner glass">
+                        <div class="report-candidate-meta">
+                            <h2 id="assess-result-name">Candidate</h2>
+                            <p id="assess-result-verdict">Assessment Complete</p>
+                            <span class="text-muted" id="assess-result-time">Time taken: --</span>
+                        </div>
+                        <div class="report-score-box">
+                            <div class="score-circle-lg">
+                                <span class="score-num" id="assess-result-score">--</span>
+                                <span class="score-sub">%</span>
+                            </div>
+                            <span class="rec-badge-lg" id="assess-result-correct">0 / 20 correct</span>
+                        </div>
+                    </div>
+
+                    <div class="report-card glass">
+                        <h3 class="card-title">Section Breakdown</h3>
+                        <div class="assessment-breakdown-grid" id="assess-breakdown-grid"></div>
+                    </div>
+
+                    <div class="report-card glass">
+                        <h3 class="card-title">Assessor Summary</h3>
+                        <p class="summary-paragraph" id="assess-result-summary"></p>
+                    </div>
+
+                    <div class="report-card glass">
+                        <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;"><span>📝</span> Question-by-Question Review</h3>
+                        <p class="card-subtitle">Your choice, the correct answer, and a full worked solution for every question</p>
+                        <div class="assessment-review-list" id="assess-review-list"></div>
+                    </div>
+
+                    <div class="report-action-bar">
+                        <button class="btn-primary" onclick="restartAssessment()">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+                            Take a New Assessment
+                        </button>
+                        <button class="btn-secondary" onclick="switchNavTab('dashboard')">Back to Dashboard</button>
+                    </div>
+                </div>
+
+            </section>
+</main>
+    <!-- ASSESSMENT RULES & PROCTORING MODAL -->
+<div class="modal-overlay instructions-modal-overlay" id="assessment-instructions-overlay">
+  <div class="modal-card instructions-page-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span style="font-size:1.6rem;display:flex;align-items:center;">📋</span>
+        <div>
+          <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;color:#1553a9;font-weight:700;">JobJugad Assessment &bull; Round 1</div>
+          <h3 style="margin:0;font-size:1.35rem;color:#1e293b;font-weight:700;">Aptitude &amp; Reasoning Assessment Rules &amp; Proctoring Notice</h3>
+        </div>
+      </div>
+      <div class="badge badge-purple" style="font-size:0.82rem;padding:6px 14px;border-radius:20px;background:#ede9fe;color:#5b21b6;font-weight:700;display:inline-flex;align-items:center;gap:6px;">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8b5cf6;"></span>
+        🛡️ AI Proctoring Active
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="instructions-inner-container">
+        <p style="margin-top:0;margin-bottom:18px;color:#4b5563;font-size:1.05rem;line-height:1.6;">
+          This is an <strong>AI-proctored assessment</strong>. Your webcam must stay on for the entire duration and the AI monitor will flag any of the following:
+        </p>
+        <ol style="margin-left:22px;color:#1e293b;padding-left:0;font-size:0.98rem;line-height:1.75;">
+          <li style="margin-bottom:14px;"><strong>Sit in a well-lit, quiet space.</strong> Make sure your face is clearly visible with good lighting, enough room, and only one person &mdash; you &mdash; present.</li>
+          <li style="margin-bottom:14px;"><strong>No tab or window switching.</strong> Leaving or minimising this tab is recorded as a violation.</li>
+          <li style="margin-bottom:14px;"><strong>No phones or gadgets.</strong> Mobile phones, tablets, smart watches, laptops, or books visible in the camera will be flagged.</li>
+          <li style="margin-bottom:14px;"><strong>Stay alone in the frame.</strong> A second person detected on camera is a violation.</li>
+          <li style="margin-bottom:14px;"><strong>Face the screen.</strong> Keep your face visible; repeatedly looking away is flagged.</li>
+          <li style="margin-bottom:14px;"><strong>Do not refresh or close</strong> the page during the assessment.</li>
+        </ol>
+        <div style="margin-top:22px;padding:14px 18px;background:#fef2f2;border-left:4px solid #ef4444;border-radius:8px;color:#991b1b;font-size:0.95rem;font-weight:600;display:flex;align-items:center;gap:8px;">
+          <span>⚠️</span> After 10 warnings the assessment is submitted automatically. The 30-minute timer starts now and cannot be paused.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="cancelAssessmentStart()" style="padding:10px 22px;border-radius:8px;font-weight:600;">Cancel</button>
+      <button class="btn-primary" onclick="confirmAssessmentStart()" style="padding:10px 24px;border-radius:8px;font-weight:700;">I Understand &mdash; Start Assessment &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+function switchNavTab(name){
+  if (state.currentTab === 'assessment' && name !== 'assessment'
+      && typeof assessmentState !== 'undefined' && assessmentState.phase === 'live') {
+    if (!confirm('Leaving this page will end your assessment. Continue?')) return;
+    stopAssessmentTimer(); stopAssessmentProctoring();
+    assessmentState.phase = 'intro'; renderAssessmentPanels();
+  }
+  state.currentTab = name;
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.view-tab').forEach(v=>v.classList.remove('active'));
+  document.getElementById('tab-btn-'+name)?.classList.add('active');
+  document.getElementById('view-'+name)?.classList.add('active');
+  if (name === 'assessment' && typeof renderAssessmentPanels === 'function') renderAssessmentPanels();
+}
+</script>
+<script src="/static/aptitude.js"></script>
+</body>
+</html>

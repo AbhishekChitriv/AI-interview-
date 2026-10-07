@@ -1,0 +1,24 @@
+# ── core ──────────────────────────────────────────────────────────────────
+fastapi>=0.110
+uvicorn[standard]>=0.27
+python-multipart>=0.0.9        # form / file uploads (Module 1 & 2)
+python-dotenv>=1.0
+requests>=2.28                 # unified LLM factory (no provider SDKs needed)
+pydantic>=2.0
+
+# ── Module 2: resume / JD text extraction ────────────────────────────────
+pypdf>=3.0.0
+python-docx>=0.8.11
+
+# ── Module 3 & 3.5: aptitude + coding rounds (Groq via OpenAI-compatible client) ─
+openai>=1.0                    # used only as an OpenAI-compatible HTTP client
+
+# ── Module 3.75: AI interview round (speech synthesis, best-effort) ──────
+edge-tts>=6.1
+
+# ── Module 4: PDF export (optional — HTML fallback if absent) ────────────
+reportlab>=4.0
+
+# ── optional infrastructure (auto-detected via REDIS_URL / MONGO_URI) ────
+redis>=5.0 ; python_version >= "3.8"
+pymongo>=4.6

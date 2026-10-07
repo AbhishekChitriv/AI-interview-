@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+edge-tts
+python-dotenv
+openai
+python-multipart
+pypdf

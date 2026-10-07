@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jobjugaad — AI Performance & Candidate Assessment Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Background Glow Elements -->
+  <div class="glow-orb glow-1"></div>
+  <div class="glow-orb glow-2"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-wrapper">
+          <div class="logo-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="flex-align gap-2">
+              <h1 class="app-title">Jobjugaad</h1>
+              <span class="badge badge-accent">Module 4: Performance Engine</span>
+            </div>
+            <p class="app-subtitle">AI Multi-Stage Assessment, Right/Wrong Answer Recording & Audio Debrief</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="badge date-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="18" y2="10"></line></svg>
+          Active Pipeline: 5 Evaluated
+        </span>
+        <button id="themeToggle" class="btn btn-icon" title="Toggle Theme">
+          <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </button>
+        <button class="btn btn-primary" onclick="exportSessionDossier()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download Session Package (With Answer Sheets)
+        </button>
+      </div>
+    </header>
+
+    <!-- Interactive AI Voice Executive Debrief Player (Standout Feature #1) -->
+    <section class="glass-card audio-player-banner">
+      <div class="audio-banner-left">
+        <div class="audio-pulse-icon" id="audioPulse">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+        </div>
+        <div>
+          <div class="flex-align gap-2">
+            <span class="badge badge-primary">⭐ Standout Innovation</span>
+            <h3 class="audio-title">60-Second AI Voice Executive Debrief</h3>
+          </div>
+          <p class="audio-desc" id="audioCandidateSummary">Listen to AI synthesized summary for candidate: <strong>Aarav Sharma</strong> (Strong Hire).</p>
+        </div>
+      </div>
+      <div class="audio-banner-right">
+        <select id="audioCandidateSelector" class="form-select" style="min-width: 200px;">
+          <option value="0">Aarav Sharma (Strong Hire)</option>
+          <option value="1">Priya Nair (Hire + Mentorship)</option>
+          <option value="2">Vikram Mehta (Rejected - Bluffing)</option>
+          <option value="3">Rohan Deshmukh (Rejected - Skills)</option>
+          <option value="4">Sneha Kulkarni (Role Pivot)</option>
+        </select>
+        <button id="playAudioBtn" class="btn btn-audio">
+          <svg id="playIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span id="playBtnText">Play AI Audio Memo</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- KPI Summary Row -->
+    <section class="stats-grid">
+      <div class="stat-card glass-card">
+        <div class="stat-icon icon-blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Candidates Assessed</span>
+          <span class="stat-value" id="kpiTotal">5</span>
+          <span class="stat-hint">Across 3 assessment gates</span>
+        </div>
+      </div>
+
+      <div class="stat-card glass-card">
+        <div class="stat-icon icon-green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Offer Recommendation</span>
+          <span class="stat-value" id="kpiHireRate">40%</span>
+          <span class="stat-hint">1 Direct + 1 Mentorship</span>
+        </div>
+      </div>
+
+      <div class="stat-card glass-card">
+        <div class="stat-icon icon-purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Bluffing Red Flags</span>
+          <span class="stat-value text-danger" id="kpiBluffing">1</span>
+          <span class="stat-hint">Resume claim misrepresentation</span>
+        </div>
+      </div>
+
+      <div class="stat-card glass-card">
+        <div class="stat-icon icon-amber">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Avg. Aptitude Accuracy</span>
+          <span class="stat-value" id="kpiAvgAptitude">80%</span>
+          <span class="stat-hint">Benchmark cutoff: 75%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visual Analytics & Comparative Breakdown -->
+    <div class="grid-2-col">
+      <!-- Radar Comparison Chart -->
+      <div class="glass-card chart-container-card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">5-Axis Competency Radar</h2>
+            <p class="card-subtitle">Problem Solving, Coding Efficiency, System Logic, Communication, Authenticity</p>
+          </div>
+          <div class="chart-controls">
+            <select id="radarCandidateSelect" class="form-select">
+              <option value="all">Compare All</option>
+              <option value="0">Aarav Sharma</option>
+              <option value="1">Priya Nair</option>
+              <option value="2">Vikram Mehta</option>
+              <option value="3">Rohan Deshmukh</option>
+              <option value="4">Sneha Kulkarni</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="competencyRadarChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Stage Performance Interactive Card -->
+      <div class="glass-card chart-container-card">
+        <div class="card-header flex-wrap">
+          <div>
+            <div class="flex-align gap-2">
+              <h2 class="card-title">Stage-by-Stage Performance</h2>
+              <span id="activeStageBadge" class="badge badge-info">Overview Mode</span>
+            </div>
+            <p class="card-subtitle" id="activeStageSubtitle">Multi-gate performance index across Aptitude, Coding & Interview</p>
+          </div>
+          <!-- Stage View Filter Tabs -->
+          <div class="stage-nav-tabs">
+            <button class="stage-tab active" data-stage="all">All Stages</button>
+            <button class="stage-tab" data-stage="1">Stage 1: Aptitude (Right/Wrong)</button>
+            <button class="stage-tab" data-stage="2">Stage 2: Coding (Pass/Fail)</button>
+            <button class="stage-tab" data-stage="3">Stage 3: Interview</button>
+          </div>
+        </div>
+        
+        <!-- Stage Specific Info Bar (Dynamically updated) -->
+        <div class="stage-metrics-chip-row" id="stageMetricsChipRow">
+          <div class="stage-chip">
+            <span class="chip-label">Stage 1 Cutoff</span>
+            <span class="chip-val">≥ 75% Accuracy</span>
+          </div>
+          <div class="stage-chip">
+            <span class="chip-label">Stage 2 Benchmark</span>
+            <span class="chip-val">≥ 3.5 / 5.0 (Big-O ≤ O(n log n))</span>
+          </div>
+          <div class="stage-chip">
+            <span class="chip-label">Stage 3 Gate</span>
+            <span class="chip-val">≥ 3.5 / 5.0 (0 Bluff Flags)</span>
+          </div>
+        </div>
+
+        <div class="chart-wrapper">
+          <canvas id="stageBarChart"></canvas>
+        </div>
+
+        <!-- Stage Deep-Dive Candidate Score Strip -->
+        <div class="stage-candidate-strip" id="stageCandidateStrip">
+          <!-- Dynamically populated per stage tab -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Candidate Decision Ledger & Cards -->
+    <section class="glass-card section-card">
+      <div class="card-header flex-wrap">
+        <div>
+          <h2 class="card-title">Candidate Evaluation & Decision Ledger</h2>
+          <p class="card-subtitle">Right & Wrong question scores, Big-O efficiency, speech pace, and bluffing risk</p>
+        </div>
+        <!-- Filters -->
+        <div class="table-filters">
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="candidateSearch" placeholder="Search candidate or role...">
+          </div>
+          <select id="decisionFilter" class="form-select">
+            <option value="all">All Verdicts</option>
+            <option value="Strong Hire">Strong Hire</option>
+            <option value="Hire">Hire</option>
+            <option value="Role Pivot">Role Pivot</option>
+            <option value="Reject">Reject</option>
+          </select>
+          <select id="bluffFilter" class="form-select">
+            <option value="all">All Integrity Levels</option>
+            <option value="Zero Risk">Zero Risk</option>
+            <option value="High Risk">High Risk Flagged</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Candidate Cards Grid -->
+      <div class="candidates-grid" id="candidatesGrid">
+        <!-- Injected via JavaScript -->
+      </div>
+    </section>
+
+    <!-- NEW INTERACTIVE FEATURE: Stage 1 & Stage 2 Live Answer Recorder & Question Audit -->
+    <section class="glass-card section-card" id="answerRecorderSection">
+      <div class="card-header flex-wrap">
+        <div>
+          <div class="flex-align gap-2">
+            <h2 class="card-title">Stage 1 & 2 Answer Sheet & Live Question Recorder</h2>
+            <span class="badge badge-accent">Interactive Grader</span>
+          </div>
+          <p class="card-subtitle">Review question-by-question Right (✅) vs Wrong (❌) answers, toggle status, or record new live evaluation responses</p>
+        </div>
+        <div class="flex-align gap-2 flex-wrap">
+          <label style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 600;">Candidate:</label>
+          <select id="recorderCandidateSelect" class="form-select" style="min-width: 220px;">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Stage Switcher & Filters Bar -->
+      <div class="recorder-controls-bar">
+        <div class="stage-nav-tabs">
+          <button class="stage-tab rec-stage-btn active" data-stage="1">🧠 Stage 1: Aptitude Questions (25)</button>
+          <button class="stage-tab rec-stage-btn" data-stage="2">💻 Stage 2: Coding Challenges & Test Suites</button>
+        </div>
+        <div class="filter-pill-group">
+          <span style="font-size: 0.78rem; color: var(--text-muted); margin-right: 4px;">Filter:</span>
+          <button class="rec-filter-btn active" data-filter="all">All Answers</button>
+          <button class="rec-filter-btn" data-filter="right">✅ Right Only</button>
+          <button class="rec-filter-btn" data-filter="wrong">❌ Wrong Only</button>
+        </div>
+      </div>
+
+      <!-- Live Summary KPI Bar -->
+      <div class="recorder-summary-row" id="recorderSummaryStats">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <!-- Main Layout: Question List on Left, Record New Answer Form on Right -->
+      <div class="recorder-main-grid">
+        <!-- Left: Question / Answer List -->
+        <div class="recorder-answers-container" id="recorderAnswersContainer">
+          <!-- Dynamically populated per candidate & stage -->
+        </div>
+
+        <!-- Right: Record New Live Answer Panel -->
+        <div class="recorder-form-card">
+          <div class="recorder-form-header">
+            <div class="flex-align gap-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              <h3 style="font-size: 0.96rem; font-weight: 700;">Record Live Question Answer</h3>
+            </div>
+            <span class="badge badge-info" style="font-size: 0.68rem;">Instant Score Sync</span>
+          </div>
+          <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Add a newly asked question or test case for the selected candidate. Scoring and charts recalculate instantly.
+          </p>
+
+          <form id="newAnswerForm" class="new-answer-form">
+            <div class="form-group">
+              <label for="newAnsTopic">Topic / Category</label>
+              <input type="text" id="newAnsTopic" class="form-input" placeholder="e.g. Concurrency, Syllogism, Dynamic Programming" required>
+            </div>
+
+            <div class="form-group">
+              <label for="newAnsQuestion">Question or Problem Title</label>
+              <textarea id="newAnsQuestion" class="form-input" rows="2" placeholder="Enter question or challenge prompt..." required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="newAnsCandAnswer">Candidate Answer / Approach</label>
+              <input type="text" id="newAnsCandAnswer" class="form-input" placeholder="Candidate's submitted answer or test outcome" required>
+            </div>
+
+            <div class="form-group">
+              <label for="newAnsCorrectAnswer">Expected / Benchmark Answer</label>
+              <input type="text" id="newAnsCorrectAnswer" class="form-input" placeholder="Expected correct answer or target Big-O" required>
+            </div>
+
+            <div class="form-group">
+              <label for="newAnsStatus">Evaluation Outcome (Right / Wrong)</label>
+              <select id="newAnsStatus" class="form-select" style="width: 100%;">
+                <option value="right">✅ Right (Correct / Passed Test Suites)</option>
+                <option value="wrong">❌ Wrong (Incorrect / Failed Edge Case)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="newAnsNotes">Evaluator Notes / Latency</label>
+              <input type="text" id="newAnsNotes" class="form-input" placeholder="e.g. Solved in 20s; clean recursion with base case">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Record Answer & Update Scores
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Unique Innovation Showcase: Micro-Analytics & Veracity Matrix -->
+    <div class="grid-2-col">
+      <!-- Veracity & Bluffing Detection Matrix -->
+      <div class="glass-card section-card">
+        <div class="card-header">
+          <div>
+            <div class="flex-align gap-2">
+              <h2 class="card-title">Veracity & Bluffing Detection</h2>
+              <span class="badge badge-danger">AI Deep-Scan</span>
+            </div>
+            <p class="card-subtitle">Resume claim complexity vs. live answer explanatory depth</p>
+          </div>
+        </div>
+        <div class="veracity-table-wrapper">
+          <table class="veracity-table">
+            <thead>
+              <tr>
+                <th>Candidate</th>
+                <th>Resume Claim</th>
+                <th>Interview Probing Depth</th>
+                <th>Truth Score</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Aarav S.</strong></td>
+                <td>Distributed Locking & Kafka</td>
+                <td>Explored edge cases & acknowledged boundaries</td>
+                <td><span class="score-pill score-high">98%</span></td>
+                <td><span class="badge badge-success">Verified</span></td>
+              </tr>
+              <tr>
+                <td><strong>Priya N.</strong></td>
+                <td>REST API & Microservices</td>
+                <td>Honest about lack of K8s, solid core REST</td>
+                <td><span class="score-pill score-high">95%</span></td>
+                <td><span class="badge badge-success">Verified</span></td>
+              </tr>
+              <tr>
+                <td><strong>Vikram M.</strong></td>
+                <td>500k RPS Architecture</td>
+                <td>Could not explain DB sharding or idempotency</td>
+                <td><span class="score-pill score-low">30%</span></td>
+                <td><span class="badge badge-danger">Bluffing Flag</span></td>
+              </tr>
+              <tr>
+                <td><strong>Rohan D.</strong></td>
+                <td>React & SQL Optimizer</td>
+                <td>Understood basics, shallow on indexes</td>
+                <td><span class="score-pill score-mid">85%</span></td>
+                <td><span class="badge badge-success">Authentic</span></td>
+              </tr>
+              <tr>
+                <td><strong>Sneha K.</strong></td>
+                <td>Technical Product Strategy</td>
+                <td>Clear architectural trade-off articulation</td>
+                <td><span class="score-pill score-high">96%</span></td>
+                <td><span class="badge badge-success">Verified</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Speech & Communication Micro-Analytics -->
+      <div class="glass-card section-card">
+        <div class="card-header">
+          <div>
+            <div class="flex-align gap-2">
+              <h2 class="card-title">Acoustic & Speech Micro-Analytics</h2>
+              <span class="badge badge-primary">Voice STT Engine</span>
+            </div>
+            <p class="card-subtitle">Speaking pace (WPM), filler words, and answer hesitation latency</p>
+          </div>
+        </div>
+        <div class="speech-metrics-grid">
+          <div class="speech-stat-box">
+            <span class="speech-label">Ideal Speaking Pace</span>
+            <span class="speech-val">120–140 <small>WPM</small></span>
+            <span class="speech-sub">Avg measured: 132 WPM</span>
+          </div>
+          <div class="speech-stat-box">
+            <span class="speech-label">Avg. Filler Count</span>
+            <span class="speech-val">4.2 <small>/min</small></span>
+            <span class="speech-sub">"um", "like", "basically"</span>
+          </div>
+          <div class="speech-stat-box">
+            <span class="speech-label">Avg. Hesitation Latency</span>
+            <span class="speech-val">1.8 <small>sec</small></span>
+            <span class="speech-sub">Response pause before answering</span>
+          </div>
+          <div class="speech-stat-box">
+            <span class="speech-label">Tone Confidence Index</span>
+            <span class="speech-val text-success">88%</span>
+            <span class="speech-sub">Composed & professional</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Strategic HR Action Plan -->
+    <section class="glass-card section-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Hiring Committee Recommendations & Action Checklist</h2>
+          <p class="card-subtitle">Immediate post-interview operations and process refinements</p>
+        </div>
+      </div>
+      <div class="action-items-grid">
+        <div class="action-card">
+          <div class="action-header">
+            <span class="action-step">Action 1</span>
+            <span class="badge badge-success">High Priority</span>
+          </div>
+          <h3>Expedite Senior Offer — Aarav Sharma</h3>
+          <p>Initiate tier-1 compensation negotiations within 24 hours. Candidate has verified 23/25 Stage 1 aptitude accuracy, 5/5 Stage 2 coding tests, and zero bluffing flags.</p>
+          <div class="checklist-item">
+            <input type="checkbox" id="act1" checked>
+            <label for="act1">Prepare compensation band (Base + Equity)</label>
+          </div>
+        </div>
+
+        <div class="action-card">
+          <div class="action-header">
+            <span class="action-step">Action 2</span>
+            <span class="badge badge-primary">Standard</span>
+          </div>
+          <h3>Rollout SDE-II with 90-Day Mentorship — Priya Nair</h3>
+          <p>Candidate showed 21/25 Stage 1 logic, 4/5 Stage 2 tests, and high coachability. Assign Senior Staff Engineer for concurrency & architectural guidance.</p>
+          <div class="checklist-item">
+            <input type="checkbox" id="act2">
+            <label for="act2">Assign engineering mentor & draft 30-60-90 plan</label>
+          </div>
+        </div>
+
+        <div class="action-card">
+          <div class="action-header">
+            <span class="action-step">Action 3</span>
+            <span class="badge badge-warning">Role Pivot</span>
+          </div>
+          <h3>Present Solutions Track — Sneha Kulkarni</h3>
+          <p>Leverage candidate's 22/25 aptitude, 4.9/5.0 communication, and clean API design in Lead Technical Solutions or Product Engineering.</p>
+          <div class="checklist-item">
+            <input type="checkbox" id="act3">
+            <label for="act3">Schedule exploratory discussion with Product Director</label>
+          </div>
+        </div>
+
+        <div class="action-card">
+          <div class="action-header">
+            <span class="action-step">Process Insight</span>
+            <span class="badge badge-danger">Gate Refinement</span>
+          </div>
+          <h3>Standardize Stage-3 Resume Deep-Dives</h3>
+          <p>The targeted architectural deep-dive successfully flagged resume inflation in Candidate Vikram Mehta, saving costly downstream mis-hires.</p>
+          <div class="checklist-item">
+            <input type="checkbox" id="act4" checked>
+            <label for="act4">Institutionalize deep-dive question bank for panel</label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Report compiled by <strong>Technical Recruitment & Engineering Assessment Committee</strong> • Jobjugaad Executive Suite</p>
+    </footer>
+  </div>
+
+  <!-- Candidate Detail Modal with Full Answer Sheet Tabs & 30-60-90 Roadmap -->
+  <div class="modal-backdrop" id="candidateModal">
+    <div class="modal-container glass-card">
+      <div class="modal-header">
+        <div>
+          <div class="flex-align gap-2">
+            <h2 id="modalCandidateName" class="modal-title">Candidate Details</h2>
+            <span id="modalVerdictBadge" class="badge">Verdict</span>
+          </div>
+          <p id="modalCandidateRole" class="modal-subtitle">Role</p>
+        </div>
+        <button class="btn btn-icon" id="closeModalBtn">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBodyContent">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

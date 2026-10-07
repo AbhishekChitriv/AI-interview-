@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*.pyc
+storage/sessions/*
+storage/Interview_Recordings_History/*
+!storage/sessions/.gitkeep
+!storage/Interview_Recordings_History/.gitkeep
+.venv/
+venv/
